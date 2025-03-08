@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "com.example.lab1"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.lab1"
@@ -14,6 +14,16 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+              //  cppFlags = ""
+                cppFlags.add("")
+            }
+        }
+        ndk {
+            abiFilters.addAll(listOf("x86", "x86_64"))
+           // abiFilters "x86", "x86_64"
+        }
     }
 
     buildTypes {
@@ -42,7 +52,9 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
+    implementation(libs.activity)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    implementation("commons-codec:commons-codec:1.15")
 }
