@@ -18,10 +18,16 @@ import com.example.lab1.databinding.ActivityMainBinding;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.IOUtils;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity implements TransactionEvents {
 
@@ -46,24 +52,11 @@ public class MainActivity extends AppCompatActivity implements TransactionEvents
     }
 
     public void onButtonClick(View v) {
-        Intent it = new Intent(this, PinpadActivity.class);
-        //startActivity(it);
-//        new Thread(()-> {
-//            try {
-//                byte[] trd = stringToHex("9F0206000000000100");
-//                boolean ok = transaction(trd);
-//                runOnUiThread(()-> {
-//                    Toast.makeText(MainActivity.this, ok ? "ok" : "failed", Toast.LENGTH_SHORT).show();
-//                });
-//
-//            } catch (Exception ex) {
-//                // todo: log error
-//            }
-//        }).start();
-        
-     //   activityResultLauncher.launch(it);
+        // Intent it = new Intent(this, PinpadActivity.class);
+        //   activityResultLauncher.launch(it);
         byte[] trd = stringToHex("9F0206000000000100");
         transaction(trd);
+      //  testHttpClient();
     }
 
     @Override
@@ -85,9 +78,39 @@ public class MainActivity extends AppCompatActivity implements TransactionEvents
 
     @Override
     public void transactionResult(boolean result) {
-        runOnUiThread(()-> {
+        runOnUiThread(() -> {
             Toast.makeText(MainActivity.this, result ? "ok" : "failed", Toast.LENGTH_SHORT).show();
         });
+    }
+
+    protected void testHttpClient() {
+        new Thread(() -> {
+            try {
+                HttpURLConnection uc = (HttpURLConnection)
+                        (new URL("http://10.0.2.2:8081/api/v1/title").openConnection());
+                InputStream inputStream = uc.getInputStream();
+                String html = IOUtils.toString(inputStream);
+                String title = getPageTitle(html);
+                runOnUiThread(() ->
+                {
+                    Toast.makeText(this, title, Toast.LENGTH_LONG).show();
+                });
+
+            } catch (Exception ex) {
+                Log.e("fapptag", "Http client fails", ex);
+            }
+        }).start();
+    }
+
+    protected String getPageTitle(String html) {
+        Pattern pattern = Pattern.compile("<title>(.+?)</title>", Pattern.DOTALL); //(.+?)  группа, которая соответствует любому символу (.) одному или более раз (+), но как можно меньшему количеству символов (?)
+        Matcher matcher = pattern.matcher(html);
+        String p;
+        if (matcher.find())
+            p = matcher.group(1);
+        else
+            p = "Not found";
+        return p;
     }
 
 
@@ -103,6 +126,8 @@ public class MainActivity extends AppCompatActivity implements TransactionEvents
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        testHttpClient();
 
         String keyString = "1516411215413156";
         byte[] key = keyString.getBytes(StandardCharsets.US_ASCII);
