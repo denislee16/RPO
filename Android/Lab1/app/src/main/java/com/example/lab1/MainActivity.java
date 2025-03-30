@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements TransactionEvents
     public void onButtonClick(View v) {
         // Intent it = new Intent(this, PinpadActivity.class);
         //   activityResultLauncher.launch(it);
-        byte[] trd = stringToHex("9F0206000000000100");
+        byte[] trd = stringToHex("9F0206000000000100"); //9F02 это код тега указывающий на то, что передаваемое значение это сумма, 06 это длина значения в байтах, а остальное это значение суммы в копейках в формате BCD, равное 1.00р.
         transaction(trd);
       //  testHttpClient();
     }
@@ -161,19 +161,6 @@ public class MainActivity extends AppCompatActivity implements TransactionEvents
                         }
                     }
                 });
-
-//        new Thread(()-> {
-//            try {
-//                byte[] trd = stringToHex("9F0206000000000100");
-//                boolean ok = transaction(trd);
-//                runOnUiThread(()-> {
-//                    Toast.makeText(MainActivity.this, ok ? "ok" : "failed", Toast.LENGTH_SHORT).show();
-//                });
-//
-//            } catch (Exception ex) {
-//                // todo: log error
-//            }
-//        }).start();
     }
 
 

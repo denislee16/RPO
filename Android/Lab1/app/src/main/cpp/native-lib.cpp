@@ -186,7 +186,7 @@ Java_com_example_lab1_MainActivity_transaction(JNIEnv *xenv, jobject xthiz, jbyt
         JNIEnv *env = getEnv(detach);
         jclass cls = env->GetObjectClass(thiz);
         jmethodID id = env->GetMethodID(
-                cls, "enterPin", "(ILjava/lang/String;)Ljava/lang/String;");
+                cls, "enterPin", "(ILjava/lang/String;)Ljava/lang/String;"); //в круглых скобках указаны параметр типа int I и строка L. Тип возвращаемого значения, тоже строка, указан справа за скобками.
         uint8_t *p = (uint8_t *) env->GetByteArrayElements(trd, 0);
         jsize sz = env->GetArrayLength(trd);
         if ((sz != 9) || (p[0] != 0x9F) || (p[1] != 0x02) || (p[2] != 0x06))
