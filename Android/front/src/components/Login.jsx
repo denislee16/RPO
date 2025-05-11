@@ -2,8 +2,9 @@ import React, {useState} from 'react';
 import BackendService from '../services/BackendService';
 import Utils from "../utils/Utils";
 import {useNavigate} from "react-router-dom";
+import {connect} from "react-redux";
 
-export default function  Login() {
+export default connect() (function  Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loggingIn, setLoggingIn] = useState(false);
@@ -27,18 +28,18 @@ export default function  Login() {
         BackendService.login(username, password)
             .then ( resp => {
                 console.log(resp.data);
-                Utils.saveUser(resp.data);
                 setLoggingIn(false);
+                dispatch(userActions.login(resp.data))
                 nav("/home");
             })
             .catch( err => {
                 if (err.response && err.response.status === 401)
-                    setErrorMessage("Ошибка авторизации");
+                setErrorMessage("Ошибка авторизации");
                 else
-                    setErrorMessage(err.message);
+                setErrorMessage(err.message);
                 setLoggingIn(false);
             })
-        }
+    }
 
         return  (
             <div className="col-md-6 me-0">
@@ -71,4 +72,4 @@ export default function  Login() {
             </form>
         </div>
         );
-}
+})
