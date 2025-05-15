@@ -1,12 +1,16 @@
-import { createStore, combineReducers, applyMiddleware } from 'redux';
+import Utils from "../utils/Utils";
+import {combineReducers, createStore, applyMiddleware} from 'redux';
 import { createLogger } from 'redux-logger';
-import Utils from './Utils';
 
 /* ACTIONS */
 
 const userConstants = {
     LOGIN: 'USER_LOGIN',
     LOGOUT: 'USER_LOGOUT',
+};
+const alertConstants = {
+    ERROR: 'ERROR',
+    CLEAR: 'CLEAR',
 };
 
 
@@ -26,6 +30,19 @@ function logout() {
     Utils.removeUser()
     return { type: userConstants.LOGOUT }
 }
+export const alertActions = {
+    error,
+    clear
+};
+
+function error(msg) {
+    return { type: alertConstants.ERROR, msg }
+}
+
+function clear() {
+    return { type: alertConstants.CLEAR }
+}
+
 
 /* REDUСERS */
 
@@ -38,6 +55,18 @@ function authentication(state = initialState, action) {
         case userConstants.LOGIN:
             return { user: action.user };
         case userConstants.LOGOUT:
+            return { };
+        default:
+            return state
+    }
+}
+
+function alert(state = {}, action) {
+    console.log("alert")
+    switch (action.type) {
+        case alertConstants.ERROR:
+            return { msg: action.msg };
+        case alertConstants.CLEAR:
             return { };
         default:
             return state
@@ -57,45 +86,3 @@ export const store = createStore(
     applyMiddleware( loggerMiddleware )
 );
 
-
-/* ACTIONS */
-
-const alertConstants = {
-    ERROR: 'ERROR',
-    CLEAR: 'CLEAR',
-};
-
-/* ACTION GENERATORS */
-
-export const alertActions = {
-    error,
-    clear
-};
-
-function error(msg) {
-    return { type: alertConstants.ERROR, msg }
-}
-
-function clear() {
-    return { type: alertConstants.CLEAR }
-}
-
-/* REDUСERS */
-
-function alert(state = {}, action) {
-    console.log("alert")
-    switch (action.type) {
-        case alertConstants.ERROR:
-            return { msg: action.msg };
-        case alertConstants.CLEAR:
-            return { };
-        default:
-            return state
-    }
-}
-
-/* STORE */
-
-const rootReducer = combineReducers({
-    authentication, alert
-});
