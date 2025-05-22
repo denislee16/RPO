@@ -4,7 +4,11 @@ import com.example.backend.models.Artist;
 import com.example.backend.models.Country;
 import com.example.backend.repositories.ArtistRepository;
 import com.example.backend.repositories.CountryRepository;
+import com.example.backend.tools.DataValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +30,17 @@ public class ArtistController {
     CountryRepository countryRepository;
 
     @GetMapping("/artists")
-    public List
-    getAllArtists() {
-        return artistRepository.findAll();
+    public Page getAllArtists(@RequestParam("page") int page, @RequestParam("limit") int limit) {
+        return artistRepository.findAll(PageRequest.of(page, limit, Sort.by(Sort.Direction.ASC, "name")));
+    }
+
+    @GetMapping("/artists/{id}")
+    public ResponseEntity getArtist(@PathVariable(value = "id") Long artistId)
+            throws DataValidationException
+    {
+        Artist artist = artistRepository.findById(artistId)
+                .orElseThrow(()-> new DataValidationException("Художник с таким индексом не найден"));
+        return ResponseEntity.ok(artist);
     }
 
     @PostMapping("/artists")
@@ -71,18 +83,24 @@ public class ArtistController {
         }
     }
 
-    @DeleteMapping("/artists/{id}")
-    public ResponseEntity<Object> deleteArtist(@PathVariable(value = "id") Long artistId) {
-        Optional<Artist>
-                artist = artistRepository.findById(artistId);
-        Map<String, Boolean>
-                resp = new HashMap<>();
-        if (artist.isPresent()) {
-            artistRepository.delete(artist.get());
-            resp.put("deleted", Boolean.TRUE);
-        }
-        else
-            resp.put("deleted", Boolean.FALSE);
-        return ResponseEntity.ok(resp);
+    @PostMapping("/deleteartists")
+    public ResponseEntity deleteArtists(@RequestBody List <Artist>artists) {
+        artistRepository.deleteAll(artists);
+        return new ResponseEntity(HttpStatus.OK);
     }
+
+//    @DeleteMapping("/artists/{id}")
+//    public ResponseEntity<Object> deleteArtist(@PathVariable(value = "id") Long artistId) {
+//        Optional<Artist>
+//                artist = artistRepository.findById(artistId);
+//        Map<String, Boolean>
+//                resp = new HashMap<>();
+//        if (artist.isPresent()) {
+//            artistRepository.delete(artist.get());
+//            resp.put("deleted", Boolean.TRUE);
+//        }
+//        else
+//            resp.put("deleted", Boolean.FALSE);
+//        return ResponseEntity.ok(resp);
+//    }
 }

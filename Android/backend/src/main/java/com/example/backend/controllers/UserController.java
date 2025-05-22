@@ -9,6 +9,9 @@ import com.example.backend.repositories.UserRepository;
 import com.example.backend.tools.DataValidationException;
 import com.example.backend.tools.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.codec.Hex;
@@ -27,8 +30,17 @@ public class UserController {
     MuseumRepository museumRepository;
 
     @GetMapping("/users")
-    public List getAllUsers() {
-        return userRepository.findAll();
+    public Page getAllUsers(@RequestParam("page") int page, @RequestParam("limit") int limit) {
+        return userRepository.findAll(PageRequest.of(page, limit, Sort.by(Sort.Direction.ASC, "login")));
+    }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity getUser(@PathVariable(value = "id") Long userId)
+            throws DataValidationException
+    {
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new DataValidationException("Пользователь с таким индексом не найден"));
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping("/users")
@@ -121,15 +133,9 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/users/{id}")
-    public ResponseEntity<Object> deleteUser(@PathVariable(value = "id") Long userId) {
-        Optional<User> user = userRepository.findById(userId);
-        Map<String, Boolean> resp = new HashMap<>();
-        if (user.isPresent()) {
-            userRepository.delete(user.get());
-            resp.put("deleted", Boolean.TRUE);
-        } else
-            resp.put("deleted", Boolean.FALSE);
-        return ResponseEntity.ok(resp);
+    @PostMapping("/deleteusers")
+    public ResponseEntity deleteUsers(@RequestBody List<User> users) {
+        userRepository.deleteAll(users);
+        return new ResponseEntity(HttpStatus.OK);
     }
 }
